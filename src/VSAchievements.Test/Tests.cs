@@ -8,11 +8,11 @@ namespace VSAchievements.Test
     [TestClass]
     public class Tests
     {
-        private VSAchivementsApi Client;
+        private VSAchivements Client;
 
         public Tests()
         {
-            Client = new VSAchivementsApi();
+            Client = new VSAchivements();
         }
 
 

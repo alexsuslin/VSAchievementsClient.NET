@@ -1,55 +1,85 @@
-﻿using Newtonsoft.Json;
-using RestSharp;
+﻿using RestSharp;
 using VSAchievements.Api.Constants;
 
 namespace VSAchievements.Api.Objects
 {
-    public class VSAchievementsResponse
+    public interface IVSAchievementsResponse
     {
-        #region Fields
-
-        public readonly Status Status;
-        public readonly bool isOk;
-
-        #endregion
-        
-        protected internal IRestResponse Response { get; private set; }
-
-        #region Constructors
-
-        internal VSAchievementsResponse(IRestResponse response)
-        {
-            Response = response;
-            Status = (Status) response.StatusCode;
-            isOk = Status == Status.Success;
-        }
-
-        #endregion
+        bool IsOk { get; }
+        Status Status { get; set; }
     }
 
-
-    public class VSAchievementsResponse<T> : VSAchievementsResponse
+    public interface IVSAchievementsResponse<T> : IVSAchievementsResponse
     {
+        T Data { get; set; }
+    }
+
+    public abstract class VSAchievementsResponseBase
+    {
+        #region Properties (Stats)
+
+        protected internal IRestResponse Response { get; set; }
+
+        public bool IsOk { get { return Status == Status.Success; } }
+
+        public Status Status { get; set; }
+
+        #endregion
+
+        protected internal VSAchievementsResponseBase(IRestResponse response)
+        {
+            Response = response;
+            Status = (Status)response.StatusCode;
+        }
+
+        protected VSAchievementsResponseBase()
+        {
+        }
+    }
+
+    public class VSAchievementsResponse<T> : VSAchievementsResponseBase, IVSAchievementsResponse<T>
+    {
+
+        protected internal VSAchievementsResponse(IRestResponse<T> response)
+            : base(response)
+        {
+            Data = response.Data;
+        }
+
+        protected internal VSAchievementsResponse(IRestResponse response)
+            : base(response)
+        {
+        }
+
+
+        public static implicit operator VSAchievementsResponse<T>(RestResponse response)
+        {
+            return new VSAchievementsResponse<T>(response);
+        }
+
+        public static implicit operator VSAchievementsResponse<T>(RestResponse<T> response)
+        {
+            return new VSAchievementsResponse<T>(response);
+        }
+
         #region Properties
 
-        public T Data { get; protected internal set; }
+        public T Data { get; set; }
 
         #endregion
 
-        #region Constructors
+    }
 
-        internal VSAchievementsResponse(IRestResponse<T> response) : base(response)
-        {
-            // There is a bug in RestSharp
-            //UserStatsWrapper wrapper = restResponse.Data;
-            if (Status == Status.Success)
-                Data = JsonConvert.DeserializeObject<T>(response.Content);
-        }
-
-        protected internal VSAchievementsResponse(IRestResponse response) : base(response)
+    public class VSAchievementsResponse : VSAchievementsResponseBase, IVSAchievementsResponse
+    {
+        protected internal VSAchievementsResponse(RestResponse response)
+            : base(response)
         {
         }
 
-        #endregion
+        public static implicit operator VSAchievementsResponse(RestResponse response)
+        {
+            return new VSAchievementsResponse(response);
+        }
     }
 }

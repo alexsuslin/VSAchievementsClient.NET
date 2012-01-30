@@ -48,9 +48,10 @@
     <Compile Include="Objects\AchievementsCollection.cs" />
     <Compile Include="Objects\Achivement.cs" />
     <Compile Include="Objects\EarnedAchivement.cs" />
+    <Compile Include="Objects\JsonUtilities\ApiJsonDeserializer.cs" />
     <Compile Include="Objects\UserAchievementsCollection.cs" />
     <Compile Include="Objects\VSAchivementsResponse.cs" />
-    <Compile Include="VSAchivementsApi.cs" />
+    <Compile Include="VSAchivements.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

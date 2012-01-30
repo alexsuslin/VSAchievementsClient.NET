@@ -1,10 +1,11 @@
 ﻿using RestSharp;
 using VSAchievements.Api.Constants;
 using VSAchievements.Api.Objects;
+using VSAchievements.Api.Objects.JsonUtilities;
 
 namespace VSAchievements.Api
 {
-    public class VSAchivementsApi
+    public class VSAchivements
     {
         #region Fields & Consts
 
@@ -15,7 +16,7 @@ namespace VSAchievements.Api
 
         #region Constructors
 
-        public VSAchivementsApi(string baseUrl = BaseUrl)
+        public VSAchivements(string baseUrl = BaseUrl)
         {
             
             ApiUrl = baseUrl;
@@ -23,7 +24,7 @@ namespace VSAchievements.Api
 
         #endregion
 
-
+        #region Api Methods
 
         public VSAchievementsResponse<AchievementsCollection> GetAchivements()
         {
@@ -33,39 +34,44 @@ namespace VSAchievements.Api
             return response;
         }
 
-        public VSAchievementsResponse<UserAchievementsCollection> GetUserAchivements(string username, AchivementStatus status = AchivementStatus.All)
+        public VSAchievementsResponse<UserAchievementsCollection> GetUserAchivements(string username,
+                                                                                     AchivementStatus status = AchivementStatus.All)
         {
             RestRequest request = new RestRequest(Methods.GetUserAchivements);
             request.AddParameter(Methods.Params.Json, true);
             request.AddParameter(Methods.Params.Username, username, ParameterType.UrlSegment);
-            if(status == AchivementStatus.Earned)
+            if (status == AchivementStatus.Earned)
                 request.AddParameter(Methods.Params.Raw, true);
             VSAchievementsResponse<UserAchievementsCollection> response = Execute<UserAchievementsCollection>(request);
             return response;
         }
 
+        #endregion
 
         #region Helper Methods
 
         private VSAchievementsResponse<T> Execute<T>(RestRequest request) where T : new()
         {
             RestClient client = new RestClient(ApiUrl);
-            request = RequestSetup(request);
+            request = RequestSetup(client, request);
             return new VSAchievementsResponse<T>(client.Execute<T>(request));
         }
 
         private VSAchievementsResponse Execute(RestRequest request)
         {
             RestClient client = new RestClient(ApiUrl);
-            request = RequestSetup(request);
+            request = RequestSetup(client, request);
             return new VSAchievementsResponse(client.Execute(request));
         }
 
 
-        private RestRequest RequestSetup(RestRequest request)
+        private RestRequest RequestSetup(RestClient client, RestRequest request)
         {
             request.Method = Method.POST;
             request.RequestFormat = DataFormat.Json;
+            client.AddHandler("application/json", new ApiJsonDeserializer());
+            client.AddHandler("text/json", new ApiJsonDeserializer());
+            client.AddHandler("text/x-json", new ApiJsonDeserializer());
             return request;
         }
 
